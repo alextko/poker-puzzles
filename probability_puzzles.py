@@ -12,7 +12,7 @@ class PokerQuiz:
     def __init__(self):
         self.ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
         self.suits = ['♠', '♥', '♦', '♣']
-        self.deck = [(rank, suit) for rank in self.ranks for suit in self.suits]
+        self.deck = [[rank, suit] for rank in self.ranks for suit in self.suits]
         self.rank_values = {rank: idx for idx, rank in enumerate(self.ranks)}
         self.correct_answers = 0
         self.total_questions = 0
@@ -29,7 +29,7 @@ class PokerQuiz:
         probabilities = {}
         
         # Reset deck and remove known cards
-        self.deck = [(rank, suit) for rank in self.ranks for suit in self.suits]
+        self.deck = [[rank, suit] for rank in self.ranks for suit in self.suits]
         for card in hole_cards:
             self.deck.remove(card)
         if community_cards:

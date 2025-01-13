@@ -1,0 +1,19 @@
+{
+    "Pair": {
+        "hole_pair": {
+            "hole_cards": [["A", "♠"], ["A", "♣"]],
+            "community_cards": [["K", "♦"], ["Q", "♣"], ["J", "♥"]],
+            "stage": "post-flop"
+        },
+        "pair_from_flop": {
+            "hole_cards": [["A", "♠"], ["7", "♥"]],
+            "community_cards": [["K", "♦"], ["Q", "♣"], ["7", "♣"]],
+            "stage": "post-flop"
+        },
+        "no_pair": {
+            "hole_cards": [["A", "♠"], ["7", "♥"]],
+            "community_cards": [["K", "♦"], ["Q", "♣"], ["J", "♥"]],
+            "stage": "post-flop"
+        }
+    }
+}

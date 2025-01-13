@@ -1,9 +1,11 @@
 import random
 from collections import defaultdict
 from probability_puzzles import PokerQuiz
-
+import pickle
+import tqdm
+import json
 class MonteCarloValidator:
-    def __init__(self, num_simulations=100000):
+    def __init__(self, num_simulations=10000):
         self.quiz = PokerQuiz()
         self.num_simulations = num_simulations
     def simulate_post_flop(self, hole_cards, community_cards=None):
@@ -12,9 +14,9 @@ class MonteCarloValidator:
                      "Flush", "Full House", "Four of a Kind"]
         successes = {hand: 0 for hand in hand_types}
         
-        for _ in range(self.num_simulations):
+        for _ in tqdm.tqdm(range(self.num_simulations)):
             # Reset deck and remove hole cards
-            deck = [(rank, suit) for rank in self.quiz.ranks for suit in self.quiz.suits]
+            deck = [[rank, suit] for rank in self.quiz.ranks for suit in self.quiz.suits]
             for card in hole_cards:
                 deck.remove(card)
             
@@ -164,95 +166,15 @@ class MonteCarloValidator:
 
 def run_validation_tests():
     validator = MonteCarloValidator()
-    
-    # Test cases
-    # PAIR Test Cases
-    test_cases = [
-        {
-            "hole_cards": [('A', '♠'), ('A', '♥')],
-            "community_cards": [('K', '♦'), ('Q', '♣'), ('J', '♥')],
-            "stage": "post-flop"
-        },
-        {
-            "hole_cards": [('A', '♠'), ('K', '♠')],
-            "community_cards": [('Q', '♠'), ('J', '♠'), ('2', '♣')],
-            "stage": "post-flop"
-        },
-        {
-            "hole_cards": [('8', '♣'), ('8', '♥')],
-            "community_cards": [('9', '♠'), ('A', '♣'), ('K', '♦')],
-            "stage": "post-flop"
-        },
-        {
-            "hole_cards": [('J', '♣'), ('10', '♥')],
-            "community_cards": [('9', '♠'), ('8', '♣'), ('2', '♦')],
-            "stage": "post-flop"
-        },
-        {
-            "hole_cards": [('A', '♣'), ('A', '♥')],
-            "community_cards": [('A', '♦'), ('A', '♠'), ('K', '♣')],
-            "stage": "post-flop"
-        },
-        {
-            "hole_cards": [('K', '♣'), ('K', '♥')],
-            "community_cards": [('K', '♦'), ('Q', '♠'), ('Q', '♣')],
-            "stage": "post-flop"
-        },
-        {
-            "hole_cards": [('Q', '♣'), ('J', '♣')],
-            "community_cards": [('Q', '♥'), ('J', '♠'), ('2', '♦')],
-            "stage": "post-flop"
-        },
-    ]
-    
-    for test in test_cases:
-        hole_cards = test["hole_cards"]
-        community_cards = test["community_cards"]
-        
-        # Get Monte Carlo probability
-        mc_prob = validator.simulate_post_flop(hole_cards, community_cards)
-        
-        print(f"\nTest Case: {hole_cards} + {community_cards}")
-        print(f"Monte Carlo Probabilities:")
-        for hand, prob in mc_prob.items():
-            print(f"  {hand}: {prob:.2f}%")
 
 if __name__ == "__main__":
     # run_validation_tests()
     validator = MonteCarloValidator()
-    # hole_cards = [('5', '♠'), ('Q', '♥')]
-    # community_cards = [('2', '♦'), ('4', '♣'), ('3', '♥')]
-    # mc_prob = validator.simulate_post_flop(hole_cards, community_cards)
-    # print(f"\nTest Case: {hole_cards} + {community_cards}")
-    # print(f"Monte Carlo Probabilities:")
-    # for hand, prob in mc_prob.items():
-    #     print(f"  {hand}: {prob:.2f}%")
-
-    pair_test_cases = {'hole_pair':
-        # already has pair
-        {
-            "hole_cards": [('A', '♠'), ('A', '♥')],
-            "community_cards": [('K', '♦'), ('Q', '♣'), ('J', '♥')],
-            "stage": "post-flop"
-        }
-    ,
-        # pair from flop + hole card
-        'pair_from_flop':
-        {
-            "hole_cards": [('A', '♠'), ('7', '♥')],
-            "community_cards": [('K', '♦'), ('Q', '♣'), ('7', '♥')],
-            "stage": "post-flop"
-        },
-        # no pair
-        'no_pair':
-        {
-            "hole_cards": [('A', '♠'), ('7', '♥')],
-            "community_cards": [('K', '♦'), ('Q', '♣'), ('J', '♥')],
-            "stage": "post-flop"
-        },
-    }
+    with open('test_scenarios.json', 'r') as f:
+        test_scenarios = json.load(f)
     pair_probabilities = {}
-    for scenario in pair_test_cases:
-        mc_prob = validator.simulate_post_flop(pair_test_cases[scenario]["hole_cards"], pair_test_cases[scenario]["community_cards"])
+    for scenario in test_scenarios["Pair"]:
+        mc_prob = validator.simulate_post_flop(test_scenarios["Pair"][scenario]["hole_cards"], test_scenarios["Pair"][scenario]["community_cards"])
         pair_probabilities[scenario] = mc_prob['Pair']
     print(pair_probabilities)
+    # pickle.dump(pair_probabilities, open('pair_probabilities.pickle', 'wb'))
