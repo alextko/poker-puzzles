@@ -172,9 +172,11 @@ if __name__ == "__main__":
     validator = MonteCarloValidator()
     with open('test_scenarios.json', 'r') as f:
         test_scenarios = json.load(f)
-    pair_probabilities = {}
-    for scenario in test_scenarios["Pair"]:
-        mc_prob = validator.simulate_post_flop(test_scenarios["Pair"][scenario]["hole_cards"], test_scenarios["Pair"][scenario]["community_cards"])
-        pair_probabilities[scenario] = mc_prob['Pair']
-    print(pair_probabilities)
+    all_probabilities = {}
+    for hand_type in test_scenarios:
+        all_probabilities[hand_type] = {}
+        for scenario in test_scenarios[hand_type]:
+            mc_prob = validator.simulate_post_flop(test_scenarios[hand_type][scenario]["hole_cards"], test_scenarios[hand_type][scenario]["community_cards"])
+            all_probabilities[hand_type][scenario] = mc_prob[hand_type]
+    print(all_probabilities)
     # pickle.dump(pair_probabilities, open('pair_probabilities.pickle', 'wb'))
