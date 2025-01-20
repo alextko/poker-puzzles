@@ -269,7 +269,11 @@ class MonteCarloValidator:
                     probility_two = (two_card_outs / two_card_total) * 100
                     probability = (probability_one + probility_two)
                 
-                outs_dict[hand_type] = (num_outs, round(probability, 2))
+                if 'two_card_outs' in num_outs_info:
+                    outs_dict[hand_type] = {'outs': num_outs,
+                      'two_card_outs': two_card_outs,'probability': round(probability, 2)}
+                else:
+                    outs_dict[hand_type] = (num_outs, round(probability, 2))
         return outs_dict
 
 
