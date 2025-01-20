@@ -1,0 +1,77 @@
+/* styles.css */
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #121212; /* Dark background */
+    color: #ffffff; /* White text */
+    margin: 0; /* Remove default margin */
+    padding: 0; /* Remove default padding */
+    display: flex; /* Use flexbox for centering */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    height: 100vh; /* Full viewport height */
+    position: relative; /* For loading indicator positioning */
+}
+
+.container {
+    text-align: center;
+    background-color: #1e1e1e; /* Darker container */
+    border-radius: 12px; /* Rounded corners */
+    padding: 20px; /* Padding for better spacing */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Shadow effect */
+    z-index: 1; /* Ensure it is above the loading indicator */
+}
+
+h1 {
+    font-size: 32px; /* Title size */
+    margin-bottom: 20px; /* Margin below title */
+    text-shadow: 0 0 15px #00bfff, 0 0 30px #00bfff; /* Glowing effect */
+}
+
+.button {
+    padding: 10px 15px; /* Button padding */
+    font-size: 16px; /* Font size */
+    cursor: pointer;
+    background-color: #0099cc; /* Button background color */
+    color: #ffffff; /* Button text color */
+    border: none; /* No border */
+    border-radius: 8px; /* Rounded corners */
+    transition: background-color 0.3s, box-shadow 0.3s; /* Smooth transition */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Shadow for 3D effect */
+}
+
+.button:hover {
+    background-color: #0077a3; /* Darker blue on hover */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7); /* Enhanced shadow on hover */
+    transform: translateY(-3px); /* Lift effect on hover */
+}
+
+/* Loading indicator styles */
+#loading {
+    display: none; /* Hidden by default */
+    position: absolute; /* Position it over the entire page */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+    color: white; /* Loading text color */
+    font-size: 24px; /* Loading text size */
+    display: flex; /* Flexbox for centering */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+.spinner {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite; /* Spin animation */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
