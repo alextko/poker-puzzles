@@ -4,6 +4,25 @@ from probability_puzzles import PokerQuiz
 import pickle
 import tqdm
 import json
+def binom(n, k):
+    """Calculate n choose k (binomial coefficient)
+    Args:
+        n (int): Total number of items
+        k (int): Number of items to choose
+    Returns:
+        int: Number of ways to choose k items from n items
+    """
+    if k > n:
+        return 0
+    if k == 0 or k == n:
+        return 1
+    
+    # Use multiplicative formula
+    result = 1
+    for i in range(k):
+        result *= (n - i)
+        result //= (i + 1)
+    return result
 class MonteCarloValidator:
     def __init__(self, num_simulations=10000):
         self.quiz = PokerQuiz()
@@ -162,6 +181,10 @@ class MonteCarloValidator:
                     return True
             return False
         return False
+
+
+   
+
     def _num_outs(self, hole_cards, community_cards, target_hand):
         """Calculate number of outs to achieve the target hand
         Args:
@@ -183,17 +206,12 @@ class MonteCarloValidator:
             # For two cards, we want to count individual cards that could help
             for card in deck:
                 # Check if this card could be part of a winning hand with any other remaining card
-                helps_make_hand = False
-                remaining_deck = deck.copy()
-                remaining_deck.remove(card)
-                
-                for second_card in remaining_deck:
-                    all_cards = hole_cards + community_cards + [card, second_card]
-                    if self._has_hand(all_cards, target_hand):
-                        helps_make_hand = True
-                        break
-                
-                if helps_make_hand:
+                # helps_make_hand = False
+                # remaining_deck = deck.copy()
+                # remaining_deck.remove(card)
+                # for second_card in remaining_deck:
+                all_cards = hole_cards + community_cards + [card]
+                if self._has_hand(all_cards, target_hand):
                     outs += 1
 
         return outs
@@ -210,7 +228,7 @@ class MonteCarloValidator:
         current_cards = hole_cards + community_cards
         cards_needed = 1 if len(community_cards) == 4 else 2
         remaining_cards = 52 - len(current_cards)
-
+        print('remaining cards', remaining_cards)
         for hand_type in hand_types:
             if not self._has_hand(current_cards, hand_type):
                 num_outs = self._num_outs(hole_cards, community_cards, hand_type)
@@ -219,11 +237,17 @@ class MonteCarloValidator:
                     # One card to come: outs / remaining cards
                     probability = (num_outs / remaining_cards) * 100
                 else:
+                    print('here')
                     # Two cards to come using binomial probability:
                     # P(at least one out) = 1 - P(no outs)
                     # P(no outs) = (remaining_cards - outs) * (remaining_cards - outs - 1) / (remaining_cards * (remaining_cards - 1))
-                    no_outs_prob = ((remaining_cards - num_outs) * (remaining_cards - num_outs - 1)) / (remaining_cards * (remaining_cards - 1))
-                    probability = (1 - no_outs_prob) * 100
+                    # no_outs_prob = ((remaining_cards - num_outs) * (remaining_cards - num_outs - 1)) / (remaining_cards * (remaining_cards - 1))
+                    # probability = (1 - no_outs_prob) * 100
+                    # no_outs_prob = binom(remaining_cards - num_outs)
+                    fail_draws = binom(remaining_cards - num_outs, 2)
+                    all_draws = binom(remaining_cards, 2)
+                    probability = (1 - fail_draws / all_draws) * 100
+                    
                 
                 outs_dict[hand_type] = (num_outs, round(probability, 2))
         return outs_dict
@@ -246,5 +270,5 @@ if __name__ == "__main__":
     # print(all_probabilities)
     # pickle.dump(pair_probabilities, open('pair_probabilities.pickle', 'wb'))
     hole_cards =  [["A", "♠"], ["7", "♥"]]
-    community_cards = [["K", "♦"], ["Q", "♣"], ["7", "♣"], ["J", "♦"]]
+    community_cards = [["K", "♦"], ["Q", "♣"], ["7", "♣"]]
     print(validator.calculate_outs(hole_cards, community_cards))
