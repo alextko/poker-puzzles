@@ -1,6 +1,5 @@
 import random
 from collections import defaultdict
-from probability_puzzles import PokerQuiz
 import pickle
 import tqdm
 import json
@@ -25,7 +24,10 @@ def binom(n, k):
     return result
 class MonteCarloValidator:
     def __init__(self, num_simulations=10000):
-        self.quiz = PokerQuiz()
+        self.ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+        self.suits = ['♠', '♥', '♦', '♣']
+        self.deck = [[rank, suit] for rank in self.ranks for suit in self.suits]
+        self.rank_values = {rank: idx for idx, rank in enumerate(self.ranks)}
         self.num_simulations = num_simulations
     def simulate_post_flop(self, hole_cards, community_cards=None):
         """Run Monte Carlo simulation and return probabilities for all hand types"""
@@ -35,7 +37,7 @@ class MonteCarloValidator:
         
         for _ in tqdm.tqdm(range(self.num_simulations)):
             # Reset deck and remove hole cards
-            deck = [[rank, suit] for rank in self.quiz.ranks for suit in self.quiz.suits]
+            deck = [[rank, suit] for rank in self.ranks for suit in self.suits]
             for card in hole_cards:
                 deck.remove(card)
             
@@ -190,7 +192,7 @@ class MonteCarloValidator:
             verbose = True
         else:
             verbose = False
-        deck = [[rank, suit] for rank in self.quiz.ranks for suit in self.quiz.suits]
+        deck = [[rank, suit] for rank in self.ranks for suit in self.suits]
         for card in hole_cards + community_cards:
             if card in deck:
                 deck.remove(card)
