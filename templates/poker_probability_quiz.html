@@ -15,87 +15,88 @@
             justify-content: center; /* Center horizontally */
             align-items: center; /* Center vertically */
             height: 100vh; /* Full viewport height */
+            font-size: 14px; /* Decreased from 16px or more */
         }
 
         .container {
-            max-width: 600px; /* Reduced width */
-            padding: 20px; /* Increased padding for better spacing */
+            max-width: 500px; /* Reduced width to make overall interface smaller */
+            padding: 15px; /* Increased padding for better spacing */
             text-align: center;
             background-color: #1e1e1e; /* Darker container */
-            border-radius: 12px; /* Rounded corners */
+            border-radius: 8px; /* Rounded corners */
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Shadow effect */
         }
 
         h1 {
-            font-size: 32px; /* Increased title size */
-            margin-bottom: 20px; /* Increased margin */
-            text-shadow: 0 0 15px #00bfff, 0 0 30px #00bfff; /* Glowing effect */
+            font-size: 24px; /* Decreased from 32px */
+            margin-bottom: 15px; /* Increased margin */
+            text-shadow: 0 0 10px #00bfff, 0 0 20px #00bfff; /* Glowing effect */
         }
 
         .card {
             display: inline-block;
-            width: 40px; /* Smaller size for hole cards */
-            height: 60px;
+            width: 36px; /* Smaller size for hole cards */
+            height: 50px;
             border: 2px solid #0099cc; /* Darker blue border */
-            border-radius: 8px; /* Rounded corners */
-            margin: 5px; /* Margin between cards */
+            border-radius: 6px; /* Rounded corners */
+            margin: 3px; /* Margin between cards */
             text-align: center;
-            line-height: 60px;
-            font-size: 20px; /* Font size */
-            background-color: #2a2a2a; /* Dark card background */
+            line-height: 50px;
+            font-size: 16px; /* Font size */
+            background-color: #ffffff; /* Dark card background */
             color: #ffffff; /* White text */
             transition: transform 0.2s, box-shadow 0.2s; /* Smooth transition */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Shadow for 3D effect */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* Shadow for 3D effect */
         }
 
         .card:hover {
-            transform: translateY(-5px); /* Lift effect on hover */
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7); /* Enhanced shadow on hover */
+            transform: translateY(-3px); /* Lift effect on hover */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7); /* Enhanced shadow on hover */
         }
 
         .flop-card {
             display: inline-block;
-            width: 60px; /* Size for flop cards */
-            height: 90px;
+            width: 48px; /* Size for flop cards */
+            height: 70px;
             border: 2px solid #0099cc; /* Darker blue border */
-            border-radius: 8px; /* Rounded corners */
-            margin: 5px; /* Margin between cards */
+            border-radius: 6px; /* Rounded corners */
+            margin: 3px; /* Margin between cards */
             text-align: center;
-            line-height: 90px;
-            font-size: 24px; /* Font size */
-            background-color: #2a2a2a; /* Dark card background */
+            line-height: 70px;
+            font-size: 16px; /* Font size */
+            background-color: #ffffff; /* Dark card background */
             color: #ffffff; /* White text */
             transition: transform 0.2s, box-shadow 0.2s; /* Smooth transition */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Shadow for 3D effect */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* Shadow for 3D effect */
         }
 
         .flop-card:hover {
-            transform: translateY(-5px); /* Lift effect on hover */
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7); /* Enhanced shadow on hover */
+            transform: translateY(-3px); /* Lift effect on hover */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7); /* Enhanced shadow on hover */
         }
 
         .button {
-            padding: 10px 15px; /* Button padding */
-            margin: 10px; /* Margin between buttons */
-            font-size: 16px; /* Font size */
+            padding: 6px 10px; /* Button padding */
+            margin: 6px; /* Margin between buttons */
+            font-size: 14px; /* Font size */
             cursor: pointer;
             background-color: #0099cc; /* Darker blue background */
             color: #ffffff; /* White text */
             border: none; /* No border */
-            border-radius: 8px; /* Rounded corners */
+            border-radius: 6px; /* Rounded corners */
             transition: background-color 0.3s, box-shadow 0.3s; /* Smooth transition */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Shadow for 3D effect */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* Shadow for 3D effect */
         }
 
         .button:hover {
             background-color: #0077a3; /* Darker blue on hover */
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7); /* Enhanced shadow on hover */
-            transform: translateY(-3px); /* Lift effect on hover */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7); /* Enhanced shadow on hover */
+            transform: translateY(-2px); /* Lift effect on hover */
         }
 
         .hand-option {
-            margin: 5px; /* Margin for hand options */
-            padding: 5px; /* Padding for hand options */
+            margin: 4px; /* Margin for hand options */
+            padding: 3px; /* Padding for hand options */
             background-color: #1e1e1e; /* Dark background */
             display: inline-block; /* Inline block for layout */
             border-radius: 4px; /* Rounded corners */
@@ -103,7 +104,7 @@
         }
 
         .result {
-            margin-top: 5px; /* Margin for results */
+            margin-top: 3px; /* Margin for results */
             font-weight: bold; /* Bold text */
         }
 
@@ -116,21 +117,21 @@
         }
 
         #score {
-            font-size: 18px; /* Score font size */
+            font-size: 16px; /* Score font size */
             margin: 10px; /* Margin for score */
         }
 
         .probability-input {
-            width: 50px; /* Input width */
-            padding: 5px; /* Input padding */
-            margin: 0 5px; /* Margin for inputs */
+            width: 40px; /* Input width */
+            padding: 3px; /* Input padding */
+            margin: 0 3px; /* Margin for inputs */
             text-align: center; /* Center text */
             font-size: 14px; /* Font size */
             background-color: #2a2a2a; /* Dark background */
             color: #a0a0a0; /* Darker grey text for placeholder */
             border: none; /* Remove border */
             border-radius: 4px; /* Rounded corners */
-            box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.2), 0 2px 5px rgba(0, 0, 0, 0.5); /* Inset shadow for 3D effect */
+            box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.5); /* Inset shadow for 3D effect */
         }
 
         .probability-input::placeholder {
@@ -139,11 +140,11 @@
         }
 
         .card-container {
-            margin-bottom: 20px; /* Increased margin for card containers */
+            margin-bottom: 16px; /* Increased margin for card containers */
         }
 
         .flop-container {
-            margin-bottom: 20px; /* Margin for flop container */
+            margin-bottom: 16px; /* Margin for flop container */
         }
 
         .probability-row {
@@ -154,7 +155,15 @@
         }
 
         .hand-option {
-            margin: 0 5px; /* Margin for hand options */
+            margin: 0 4px; /* Margin for hand options */
+        }
+
+        /* Make hearts/diamonds appear red, spades/clubs appear black */
+        .red {
+            color: red;
+        }
+        .black {
+            color: black;
         }
     </style>
 </head>
@@ -178,13 +187,12 @@
         </div>
 
         <div id="score">
-            Score: <span id="correct-count">0</span> / <span id="total-count">0</span>
+            <span id="correct-count">0</span> / <span id="total-count">0</span>
         </div>
         
-        <button class="button" id="check-answer" onclick="checkAnswers()">Check Answers</button>
-        <button class="button" onclick="newHand()">Deal New Hand</button>
-        
-        <button class="button" onclick="exitQuiz()">Exit Quiz</button>
+        <button class="button" id="check-answer" onclick="checkAnswers()">Check</button>
+        <button class="button" onclick="newHand()">Deal</button>
+        <button class="button" onclick="exitQuiz()">Exit</button>
 
         <div id="results"></div>
     </div>
@@ -271,9 +279,9 @@
                 });
 
                 document.getElementById('correct-count').textContent = 
-                    data.correct_answers + ' correct';  
+                    data.correct_answers;  
                 document.getElementById('total-count').textContent = 
-                    data.total_questions + ' total';
+                    data.total_questions;
 
             } catch (err) {
                 console.error(err);
@@ -286,7 +294,7 @@
             cards.forEach(card => {
                 const cardElement = document.createElement('div');
                 cardElement.className = type === 'flop' ? 'flop-card' : 'card';
-                cardElement.className += isRed(card) ? ' red' : ' black';
+                cardElement.classList.add(isRed(card) ? 'red' : 'black');
                 cardElement.textContent = card;
                 container.appendChild(cardElement);
             });
