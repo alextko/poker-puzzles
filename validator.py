@@ -186,11 +186,10 @@ class MonteCarloValidator:
    
 
     def _num_outs(self, hole_cards, community_cards, target_hand):
-        """Calculate number of outs to achieve the target hand
-        Args:
-            cards_needed: 1 or 2, number of cards needed to complete the hand
-        """
-        # Create deck and remove known cards
+        if target_hand == "Two Pair":
+            verbose = True
+        else:
+            verbose = False
         deck = [[rank, suit] for rank in self.quiz.ranks for suit in self.quiz.suits]
         for card in hole_cards + community_cards:
             if card in deck:
@@ -203,18 +202,35 @@ class MonteCarloValidator:
                 if self._has_hand(all_cards, target_hand):
                     outs += 1
         else:
-            # For two cards, we want to count individual cards that could help
+            two_card_outs = 0
+            two_card_total = 0
             for card in deck:
-                # Check if this card could be part of a winning hand with any other remaining card
-                # helps_make_hand = False
-                # remaining_deck = deck.copy()
-                # remaining_deck.remove(card)
-                # for second_card in remaining_deck:
                 all_cards = hole_cards + community_cards + [card]
                 if self._has_hand(all_cards, target_hand):
                     outs += 1
+            for card in deck:
+                for card2 in deck:
+                    if card2 == card:
+                        continue
+                    two_card_total += 1
+                    all_cards = hole_cards + community_cards + [card]
+                    if self._has_hand(all_cards, target_hand):
+                        continue
+                    all_cards = hole_cards + community_cards + [card, card2]
+                    if self._has_hand(all_cards, target_hand):
+                        two_card_outs += 1
+                # if not self._has_hand(all_cards, target_hand):
+                #     for card2 in deck:
+                #         if card2 == card:
+                #             continue
+                #         all_cards = hole_cards + community_cards + [card, card2]
+                #         if self._has_hand(all_cards, target_hand):
+                #             if verbose:
+                #                 input([card, card2])
 
-        return outs
+                #             outs += 1
+
+        return {'outs': outs, 'two_card_outs': two_card_outs, 'two_card_total': two_card_total}
 
     def calculate_outs(self, hole_cards, community_cards):
         """Calculate outs for all possible hand improvements
@@ -231,13 +247,16 @@ class MonteCarloValidator:
         print('remaining cards', remaining_cards)
         for hand_type in hand_types:
             if not self._has_hand(current_cards, hand_type):
-                num_outs = self._num_outs(hole_cards, community_cards, hand_type)
+                num_outs_info = self._num_outs(hole_cards, community_cards, hand_type)
+                num_outs = num_outs_info['outs']
+                if 'two_card_outs' in num_outs_info:
+                    two_card_outs = num_outs_info['two_card_outs']
+                    two_card_total = num_outs_info['two_card_total']
                 # Calculate probability based on number of cards to come
                 if cards_needed == 1:
                     # One card to come: outs / remaining cards
                     probability = (num_outs / remaining_cards) * 100
                 else:
-                    print('here')
                     # Two cards to come using binomial probability:
                     # P(at least one out) = 1 - P(no outs)
                     # P(no outs) = (remaining_cards - outs) * (remaining_cards - outs - 1) / (remaining_cards * (remaining_cards - 1))
@@ -246,8 +265,9 @@ class MonteCarloValidator:
                     # no_outs_prob = binom(remaining_cards - num_outs)
                     fail_draws = binom(remaining_cards - num_outs, 2)
                     all_draws = binom(remaining_cards, 2)
-                    probability = (1 - fail_draws / all_draws) * 100
-                    
+                    probability_one = (1 - fail_draws / all_draws) * 100
+                    probility_two = (two_card_outs / two_card_total) * 100
+                    probability = (probability_one + probility_two)
                 
                 outs_dict[hand_type] = (num_outs, round(probability, 2))
         return outs_dict
@@ -270,5 +290,5 @@ if __name__ == "__main__":
     # print(all_probabilities)
     # pickle.dump(pair_probabilities, open('pair_probabilities.pickle', 'wb'))
     hole_cards =  [["A", "♠"], ["7", "♥"]]
-    community_cards = [["K", "♦"], ["Q", "♣"], ["7", "♣"]]
+    community_cards = [["K", "♦"], ["Q", "♣"], ["9", "♣"]]
     print(validator.calculate_outs(hole_cards, community_cards))
