@@ -22,7 +22,16 @@ def binom(n, k):
         result *= (n - i)
         result //= (i + 1)
     return result
-class MonteCarloValidator:
+
+# def print_pretty_dict(data):
+#     for hand, values in data.items():
+#         print(f"{hand}:")
+#         for key, value in values.items():
+#             print(f"  {key}: {value}")
+#         print()  # Add a blank line for better separation
+
+
+class probabilityValidator:
     def __init__(self, num_simulations=10000):
         self.ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
         self.suits = ['♠', '♥', '♦', '♣']
@@ -189,7 +198,7 @@ class MonteCarloValidator:
 
     def _num_outs(self, hole_cards, community_cards, target_hand):
         if target_hand == "Two Pair":
-            verbose = True
+            verbose = False
         else:
             verbose = False
         deck = [[rank, suit] for rank in self.ranks for suit in self.suits]
@@ -220,6 +229,8 @@ class MonteCarloValidator:
                         continue
                     all_cards = hole_cards + community_cards + [card, card2]
                     if self._has_hand(all_cards, target_hand):
+                        if verbose:
+                            input([card,card2])
                         two_card_outs += 1
                 # if not self._has_hand(all_cards, target_hand):
                 #     for card2 in deck:
@@ -234,7 +245,7 @@ class MonteCarloValidator:
 
         return {'outs': outs, 'two_card_outs': two_card_outs, 'two_card_total': two_card_total}
 
-    def calculate_outs(self, hole_cards, community_cards):
+    def calculate_probability(self, hole_cards, community_cards):
         """Calculate outs for all possible hand improvements
         Returns:
             dict: Dictionary with keys as hand types and values as tuples (outs, probability)
@@ -246,7 +257,7 @@ class MonteCarloValidator:
         current_cards = hole_cards + community_cards
         cards_needed = 1 if len(community_cards) == 4 else 2
         remaining_cards = 52 - len(current_cards)
-        print('remaining cards', remaining_cards)
+        # print('remaining cards', remaining_cards)
         for hand_type in hand_types:
             if not self._has_hand(current_cards, hand_type):
                 num_outs_info = self._num_outs(hole_cards, community_cards, hand_type)
@@ -278,13 +289,34 @@ class MonteCarloValidator:
                     outs_dict[hand_type] = (num_outs, round(probability, 2))
         return outs_dict
 
+    def abbreviate_probability_dict(self, probability_dict):
+        """
+        Returns an abbreviated form of the probability dictionary,
+        keeping only the hand names and their corresponding probability values.
+
+        """
+        # Create a new dictionary with only hand names and their probabilities
+        abbreviated_dict = {}
+        for key in probability_dict: 
+            abbreviated_dict[key] = probability_dict[key]['probability']
+        return abbreviated_dict
+
+    def get_abbreviated_probabilities(self, hole_cards, community_cards):
+        """
+        Calculates the probabilities and returns an abbreviated dictionary.
+
+        """
+        probabilities = self.calculate_probability(hole_cards, community_cards)
+        # input (probabilities)
+        return self.abbreviate_probability_dict(probabilities)
+
 
 def run_validation_tests():
-    validator = MonteCarloValidator()
+    validator = probabilityValidator()
 
 if __name__ == "__main__":
     # run_validation_tests()
-    validator = MonteCarloValidator()
+    validator = probabilityValidator()
     # with open('test_scenarios.json', 'r') as f:
     #     test_scenarios = json.load(f)
     # all_probabilities = {}
@@ -297,4 +329,7 @@ if __name__ == "__main__":
     # pickle.dump(pair_probabilities, open('pair_probabilities.pickle', 'wb'))
     hole_cards =  [["A", "♠"], ["7", "♥"]]
     community_cards = [["K", "♦"], ["Q", "♣"], ["9", "♣"]]
-    print(validator.calculate_outs(hole_cards, community_cards))
+    # probabilities = validator.calculate_probability(hole_cards, community_cards)
+    # print_pretty_dict(probabilities)
+    abbreviated_probabilities = validator.get_abbreviated_probabilities(hole_cards, community_cards)
+    print(abbreviated_probabilities)

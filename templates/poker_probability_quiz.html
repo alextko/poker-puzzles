@@ -173,23 +173,23 @@
         </div>
         
         <div class="probability-row" id="hand-options">
-            <h3>What's the probability of getting:</h3>
-            <!-- Hand options will be dynamically added here -->
+            <!-- <h3>What's the probability of getting:</h3> -->
+            <!-- Hand options will be populated by createHandOptions() (below) -->
         </div>
 
-        <div id="score">Score: <span id="correct-count">0</span> / <span id="total-count">0</span></div>
+        <div id="score">
+            Score: <span id="correct-count">0</span> / <span id="total-count">0</span>
+        </div>
         
         <button class="button" id="check-answer" onclick="checkAnswers()">Check Answers</button>
         <button class="button" onclick="newHand()">Deal New Hand</button>
         
+        <button class="button" onclick="exitQuiz()">Exit Quiz</button>
+
         <div id="results"></div>
     </div>
 
     <script>
-        let currentProbabilities = null;
-        let correctCount = 0;
-        let totalCount = 0;
-
         const handTypes = [
             "Pair",
             "Two Pair",
@@ -203,7 +203,7 @@
 
         function createHandOptions() {
             const container = document.getElementById('hand-options');
-            container.innerHTML = ''; // Clear previous options
+            container.innerHTML = '';
             
             handTypes.forEach(handType => {
                 const div = document.createElement('div');
@@ -216,7 +216,6 @@
                            min="0" 
                            max="100" 
                            step="0.1" 
-                           value="" 
                            placeholder="0">%
                     <div class="result" id="${handType}-result"></div>
                 `;
@@ -225,17 +224,60 @@
         }
 
         function newHand() {
-            fetch('/new_hand', {
-                method: 'POST'
-            })
+            fetch('/new_hand', { method: 'POST' })
             .then(response => response.json())
             .then(data => {
                 displayCards('hole-cards', data.hole_cards, 'hole');
                 displayCards('community-cards', data.community_cards, 'flop');
-                currentProbabilities = data.probabilities;
                 createHandOptions();
                 clearResults();
+            })
+            .catch(console.error);
+        }
+
+        function clearResults() {
+            handTypes.forEach(handType => {
+                const resultDiv = document.getElementById(`${handType}-result`);
+                if (resultDiv) resultDiv.innerHTML = '';
             });
+        }
+
+        async function checkAnswers() {
+            const guesses = {};
+            handTypes.forEach(ht => {
+                const rawVal = document.getElementById(`${ht}-input`).value;
+                guesses[ht] = parseFloat(rawVal) || 0;
+            });
+
+            try {
+                const res = await fetch("/poker_quiz/check_all", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ guesses })
+                });
+                const data = await res.json();
+
+                const results = data.results;
+                Object.entries(results).forEach(([handType, info]) => {
+                    const resultDiv = document.getElementById(`${handType}-result`);
+                    if (resultDiv) {
+                        resultDiv.innerHTML = `
+                            <span class="${info.correct ? 'correct' : 'incorrect'}">
+                                Actual: ${info.actual_prob.toFixed(1)}%
+                                ${info.correct ? '✓' : '✗'}
+                            </span>
+                        `;
+                    }
+                });
+
+                document.getElementById('correct-count').textContent = 
+                    data.correct_answers + ' correct';  
+                document.getElementById('total-count').textContent = 
+                    data.total_questions + ' total';
+
+            } catch (err) {
+                console.error(err);
+            }
         }
 
         function displayCards(containerId, cards, type) {
@@ -254,46 +296,22 @@
             return card.includes('♥') || card.includes('♦');
         }
 
-        function clearResults() {
-            handTypes.forEach(handType => {
-                const resultDiv = document.getElementById(`${handType}-result`);
-                if (resultDiv) resultDiv.innerHTML = '';
-            });
+        async function exitQuiz() {
+            try {
+                const res = await fetch("/exit_quiz", { method: "POST" });
+                const data = await res.json();
+                if (data.redirect) {
+                    window.location.replace(data.redirect);
+                }
+            } catch (err) {
+                console.error(err);
+            }
         }
 
-        function checkAnswers() {
-            let correctThisRound = 0;
-            handTypes.forEach(handType => {
-                const input = document.getElementById(`${handType}-input`);
-                const guessedProb = parseFloat(input.value);
-                const actualProb = (currentProbabilities[handType.toLowerCase()] || 0) * 100;
-                const resultDiv = document.getElementById(`${handType}-result`);
-                
-                // Consider guess correct if within 5 percentage points
-                const isCorrect = Math.abs(guessedProb - actualProb) <= 5;
-                if (isCorrect) correctThisRound++;
-                
-                resultDiv.innerHTML = `
-                    <span class="${isCorrect ? 'correct' : 'incorrect'}">
-                        Actual: ${actualProb.toFixed(1)}%
-                        ${isCorrect ? '✓' : '✗'}
-                    </span>
-                `;
-            });
-
-            correctCount += correctThisRound;
-            totalCount += handTypes.length;
-            updateScore();
-        }
-
-        function updateScore() {
-            const percentageScore = ((correctCount / totalCount) * 100).toFixed(1) || 0; // Calculate percentage
-            document.getElementById('correct-count').textContent = percentageScore + '%'; // Display as percentage
-            document.getElementById('total-count').textContent = totalCount; // Total attempts
-        }
-
-        // Deal initial hand when page loads
-        newHand();
+        window.onload = () => {
+            createHandOptions();
+            newHand();
+        };
     </script>
 </body>
 </html>

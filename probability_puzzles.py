@@ -1,7 +1,7 @@
 import random
 from collections import defaultdict
 from math import factorial
-# from validator import MonteCarloValidator
+from validator import probabilityValidator
 
 def comb(n, r):
     """Calculate combinations (n choose r)"""
@@ -26,7 +26,26 @@ class PokerQuiz:
         return cards
 
     def calculate_probabilities(self, hole_cards, community_cards=None):
-        probabilities = {
+        """
+        Use probabilityValidator to get real probabilities whenever community_cards is given,
+        returning them in lowercase keys so the front-end can match them.
+        """
+        if community_cards:
+            validator = probabilityValidator()
+            raw_probs = validator.get_abbreviated_probabilities(hole_cards, community_cards)
+            
+            # Ensure that the keys match your UI (e.g., "pair", "two pair", etc.), 
+            # by converting them to lowercase/spaces if necessary:
+            probabilities = {}
+            for k, v in raw_probs.items():
+                # force the key to match your front-end, e.g. "pair", "two pair", ...
+                # if your validator returns "Pair", "Two Pair", etc., do something like:
+                probabilities[k.lower()] = v
+
+            return probabilities
+
+        # If no community cards, return zeroes (or do an optional preflop logic)
+        return {
             "pair": 0.0,
             "two pair": 0.0,
             "three of a kind": 0.0,
@@ -34,18 +53,9 @@ class PokerQuiz:
             "flush": 0.0,
             "full house": 0.0,
             "four of a kind": 0.0,
-            "straight flush": 0.0
+            "straight flush": 0.0,
+            "royal flush": 0.0
         }
-
-        # Example logic to calculate probabilities
-        # This is just a placeholder; replace with your actual logic
-        if community_cards:
-            # Here you would implement your logic to calculate the actual probabilities
-            probabilities["pair"] = 0.2  # Example probability for a pair
-            probabilities["two pair"] = 0.1  # Example probability for two pair
-            # Add other hand types...
-
-        return probabilities
 
     # def calculate_pre_flop_probabilities(self, probabilities={}, hole_cards):
     #     """Calculate probability of hitting a pair on the flop"""
