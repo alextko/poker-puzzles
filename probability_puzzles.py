@@ -1,6 +1,7 @@
 import random
 from collections import defaultdict
 from math import factorial
+# from validator import MonteCarloValidator
 
 def comb(n, r):
     """Calculate combinations (n choose r)"""
@@ -25,30 +26,24 @@ class PokerQuiz:
         return cards
 
     def calculate_probabilities(self, hole_cards, community_cards=None):
-        """Calculate probabilities for different poker hands"""
-        probabilities = {}
-        
-        # Reset deck and remove known cards
-        self.deck = [[rank, suit] for rank in self.ranks for suit in self.suits]
-        for card in hole_cards:
-            self.deck.remove(card)
-        if community_cards:
-            for card in community_cards:
-                self.deck.remove(card)
+        probabilities = {
+            "pair": 0.0,
+            "two pair": 0.0,
+            "three of a kind": 0.0,
+            "straight": 0.0,
+            "flush": 0.0,
+            "full house": 0.0,
+            "four of a kind": 0.0,
+            "straight flush": 0.0
+        }
 
+        # Example logic to calculate probabilities
+        # This is just a placeholder; replace with your actual logic
         if community_cards:
-            all_cards = hole_cards + community_cards
-            current_ranks = [card[0] for card in all_cards]
-            current_suits = [card[1] for card in all_cards]
-            rank_counts = defaultdict(int)
-            suit_counts = defaultdict(int)
-            for rank in current_ranks:
-                rank_counts[rank] += 1
-            for suit in current_suits:
-                suit_counts[suit] += 1
-            self.calculate_post_flop_probabilities(probabilities, all_cards, rank_counts, suit_counts)
-        else:
-            self.calculate_pre_flop_probabilities(probabilities, hole_cards)
+            # Here you would implement your logic to calculate the actual probabilities
+            probabilities["pair"] = 0.2  # Example probability for a pair
+            probabilities["two pair"] = 0.1  # Example probability for two pair
+            # Add other hand types...
 
         return probabilities
 
@@ -257,6 +252,20 @@ class PokerQuiz:
         else:
             print("\nNo questions were answered.")
 
+    def deal_new_hand(self):
+        """Deal a new hand of poker with hole cards and community cards"""
+        # Reset and shuffle deck
+        self.deck = [[rank, suit] for rank in self.ranks for suit in self.suits]
+        random.shuffle(self.deck)
+        
+        # Deal 2 hole cards
+        hole_cards = [self.deck.pop() for _ in range(2)]
+        
+        # Deal 3 community cards (flop)
+        community_cards = [self.deck.pop() for _ in range(3)]
+        
+        return hole_cards, community_cards
+
 def display_card(card):
     """Display a card in a visually appealing format"""
     rank, suit = card
@@ -278,22 +287,20 @@ def display_hand(hole_cards, community_cards=None):
 
 def main():
     quiz = PokerQuiz()
+    # validator = MonteCarloValidator()
     
     print("\n=== Poker Probability Quiz ===")
-    print("Note: Probabilities use at least one hole card.")
-    
-    # Ask for game mode once at the start
-    while True:
-        stage = input("\nQuiz mode (pre/post): ").lower()
-        if stage in ['pre', 'post']:
-            break
-        print("Enter 'pre' or 'post'")
+    print("Note: hands use at least one hole card.")
+
+    stage = 'post'
     
     while True:
         hole_cards = quiz.deal_cards(2)
         community_cards = quiz.deal_cards(3) if stage == 'post' else None
         
         display_hand(hole_cards, community_cards)
+
+        # validator._has_hand(hole_cards, community_cards)
         
         actual_probabilities = quiz.calculate_probabilities(hole_cards, community_cards)
         
