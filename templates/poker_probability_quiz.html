@@ -13,18 +13,19 @@
             padding: 0; /* Remove default padding */
             display: flex; /* Use flexbox for centering */
             justify-content: center; /* Center horizontally */
-            align-items: center; /* Center vertically */
+            align-items: center; /* Also center vertically */
             height: 100vh; /* Full viewport height */
             font-size: 14px; /* Decreased from 16px or more */
         }
 
         .container {
-            max-width: 500px; /* Reduced width to make overall interface smaller */
-            padding: 15px; /* Increased padding for better spacing */
+            width: 40%; /* Changed from 33% to 40% */
+            padding: 15px;
             text-align: center;
-            background-color: #1e1e1e; /* Darker container */
-            border-radius: 8px; /* Rounded corners */
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Shadow effect */
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            /* Removed margin-top so it is centered vertically again */
         }
 
         h1 {
@@ -94,68 +95,78 @@
             transform: translateY(-2px); /* Lift effect on hover */
         }
 
+        .probability-row {
+            /* Centers the vertical stack of questions in the container */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; /* added */
+            margin-top: 10px;
+        }
+
         .hand-option {
-            margin: 4px; /* Margin for hand options */
-            padding: 3px; /* Padding for hand options */
-            background-color: #1e1e1e; /* Dark background */
-            display: inline-block; /* Inline block for layout */
-            border-radius: 4px; /* Rounded corners */
-            border: none; /* Remove border */
+            /* Each row with label, input, and result is also centered horizontally */
+            margin-bottom: 4px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center; /* ensures row content is centered */
+        }
+
+        /* Give the label a fixed width and optionally right-align text */
+        .hand-option label {
+            width: 120px; /* sets all labels to be the same width */
+            text-align: right;
+            margin-right: 8px; /* small gap between label and input */
+        }
+
+        /* Keep input fields the same width; they will align vertically */
+        .probability-input {
+            width: 50px;
+            margin-right: 12px; /* spacing between input and result */
+            padding: 3px;
+            text-align: center;
+            font-size: 14px;
+            background-color: #2a2a2a;
+            color: #a0a0a0;
+            border: none;
+            border-radius: 4px;
+            box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Make the result area fixed width so they line up,
+           or let them fill the remaining space if you prefer. */
+        .hand-option .result {
+            width: 120px;
+            text-align: left;
+            margin-left: 20px; /* Increase spacing on the left of the answer text */
         }
 
         .result {
-            margin-top: 3px; /* Margin for results */
-            font-weight: bold; /* Bold text */
+            margin-top: 3px;
+            font-weight: bold;
         }
 
         .correct {
-            color: #00ff00; /* Green for correct */
+            color: #00ff00;
         }
 
         .incorrect {
-            color: #ff0000; /* Red for incorrect */
+            color: #ff0000;
         }
 
         #score {
-            font-size: 16px; /* Score font size */
-            margin: 10px; /* Margin for score */
+            font-size: 16px;
+            margin: 10px;
         }
 
-        .probability-input {
-            width: 40px; /* Input width */
-            padding: 3px; /* Input padding */
-            margin: 0 3px; /* Margin for inputs */
-            text-align: center; /* Center text */
-            font-size: 14px; /* Font size */
-            background-color: #2a2a2a; /* Dark background */
-            color: #a0a0a0; /* Darker grey text for placeholder */
-            border: none; /* Remove border */
-            border-radius: 4px; /* Rounded corners */
-            box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.2), 0 2px 4px rgba(0, 0, 0, 0.5); /* Inset shadow for 3D effect */
+        .card-container, .flop-container {
+            margin-bottom: 16px;
         }
 
-        .probability-input::placeholder {
-            color: #a0a0a0; /* Darker grey placeholder text */
-            opacity: 1; /* Ensure placeholder is fully opaque */
-        }
-
-        .card-container {
-            margin-bottom: 16px; /* Increased margin for card containers */
-        }
-
-        .flop-container {
-            margin-bottom: 16px; /* Margin for flop container */
-        }
-
-        .probability-row {
-            display: flex; /* Flexbox for layout */
-            justify-content: center; /* Center items */
-            flex-wrap: wrap; /* Wrap items */
-            margin-top: 10px; /* Margin for probability row */
-        }
-
-        .hand-option {
-            margin: 0 4px; /* Margin for hand options */
+        .flop-container h3,
+        .card-container h3 {
+            margin-bottom: 4px;
         }
 
         /* Make hearts/diamonds appear red, spades/clubs appear black */
@@ -172,19 +183,16 @@
         <h1>Poker Probability Quiz</h1>
         
         <div class="flop-container">
-            <h3>Flop Cards:</h3>
+            <h3>Flop</h3>
             <div id="community-cards" class="card-container"></div>
         </div>
 
         <div class="card-container">
-            <h3>Hole Cards:</h3>
+            <h3>Hole</h3>
             <div id="hole-cards" class="card-container"></div>
         </div>
         
-        <div class="probability-row" id="hand-options">
-            <!-- <h3>What's the probability of getting:</h3> -->
-            <!-- Hand options will be populated by createHandOptions() (below) -->
-        </div>
+        <div class="probability-row" id="hand-options"></div>
 
         <div id="score">
             <span id="correct-count">0</span> / <span id="total-count">0</span>
@@ -198,53 +206,78 @@
     </div>
 
     <script>
-        const handTypes = [
-            "Pair",
-            "Two Pair",
-            "Three of a Kind",
-            "Straight",
-            "Flush",
-            "Full House",
-            "Four of a Kind",
-            "Straight Flush"
+        // We'll store the list of non-zero hands here:
+        let displayedHands = [];
+
+        // Define the fixed order of hand types in ascending strength:
+        const handOrder = [
+            "pair",
+            "two pair",
+            "three of a kind",
+            "straight",
+            "flush",
+            "full house",
+            "four of a kind",
+            "straight flush",
+            "royal flush"
         ];
 
-        function createHandOptions() {
+        function newHand() {
+            fetch('/new_hand', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    displayCards('hole-cards', data.hole_cards, 'hole');
+                    displayCards('community-cards', data.community_cards, 'flop');
+
+                    clearResults();
+                    createHandOptions(data.probabilities);
+                })
+                .catch(console.error);
+        }
+
+        function createHandOptions(probMap) {
+            // 1) Clear any old input fields
             const container = document.getElementById('hand-options');
             container.innerHTML = '';
-            
-            handTypes.forEach(handType => {
+
+            // 2) Build displayedHands in a fixed order
+            displayedHands = [];
+            handOrder.forEach(handType => {
+                // If the server didn't return a probability for this hand type, treat that as 0
+                const probValue = parseFloat(probMap[handType] || 0);
+                if (probValue > 0) {
+                    displayedHands.push(handType);
+                }
+            });
+
+            // 3) Create a row for each displayed (non-zero) hand in that order
+            displayedHands.forEach(ht => {
+                const displayName = titleCase(ht);
                 const div = document.createElement('div');
                 div.className = 'hand-option';
                 div.innerHTML = `
-                    <label>${handType}</label>
+                    <label>${displayName}</label>
                     <input type="number" 
                            class="probability-input" 
-                           id="${handType}-input"
+                           id="${ht}-input"
                            min="0" 
                            max="100" 
                            step="0.1" 
                            placeholder="0">%
-                    <div class="result" id="${handType}-result"></div>
+                    <div class="result" id="${ht}-result"></div>
                 `;
                 container.appendChild(div);
             });
         }
 
-        function newHand() {
-            fetch('/new_hand', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                displayCards('hole-cards', data.hole_cards, 'hole');
-                displayCards('community-cards', data.community_cards, 'flop');
-                createHandOptions();
-                clearResults();
-            })
-            .catch(console.error);
+        function titleCase(str) {
+            return str.split(' ').map(word => 
+                word.charAt(0).toUpperCase() + word.slice(1)
+            ).join(' ');
         }
 
         function clearResults() {
-            handTypes.forEach(handType => {
+            displayedHands.forEach(handType => {
                 const resultDiv = document.getElementById(`${handType}-result`);
                 if (resultDiv) resultDiv.innerHTML = '';
             });
@@ -252,7 +285,7 @@
 
         async function checkAnswers() {
             const guesses = {};
-            handTypes.forEach(ht => {
+            displayedHands.forEach(ht => {
                 const rawVal = document.getElementById(`${ht}-input`).value;
                 guesses[ht] = parseFloat(rawVal) || 0;
             });
@@ -265,24 +298,19 @@
                 });
                 const data = await res.json();
 
-                const results = data.results;
-                Object.entries(results).forEach(([handType, info]) => {
+                for (const [handType, info] of Object.entries(data.results)) {
                     const resultDiv = document.getElementById(`${handType}-result`);
                     if (resultDiv) {
                         resultDiv.innerHTML = `
                             <span class="${info.correct ? 'correct' : 'incorrect'}">
-                                Actual: ${info.actual_prob.toFixed(1)}%
-                                ${info.correct ? '✓' : '✗'}
+                                ${info.actual_prob.toFixed(1)}%&nbsp;&nbsp;${info.correct ? '✓' : '✗'}
                             </span>
                         `;
                     }
-                });
+                }
 
-                document.getElementById('correct-count').textContent = 
-                    data.correct_answers;  
-                document.getElementById('total-count').textContent = 
-                    data.total_questions;
-
+                document.getElementById('correct-count').textContent = data.correct_answers;
+                document.getElementById('total-count').textContent = data.total_questions;
             } catch (err) {
                 console.error(err);
             }
@@ -317,7 +345,6 @@
         }
 
         window.onload = () => {
-            createHandOptions();
             newHand();
         };
     </script>
