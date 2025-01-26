@@ -72,7 +72,7 @@ class probabilityValidator:
         
         return probabilities
 
-    def _has_hand(self, cards, target_hand):
+    def _has_hand(self, cards, target_hand, require_hole_cards=True):
         """Check if the given cards make the target hand using at least one hole card"""
         # Separate hole cards (first 2) from other cards
         hole_cards = cards[:2]
@@ -111,37 +111,32 @@ class probabilityValidator:
         numeric_ranks = sorted(list(set(numeric_ranks)))  # Remove duplicates and sort
         
         if target_hand == "Pair":
-            # Check if there's a pair AND at least one hole card is part of any pair
             pairs_exist = any(count >= 2 for count in rank_counts.values())
             uses_hole_card = any(rank_counts[rank] >= 2 for rank in hole_ranks)
-            return pairs_exist and uses_hole_card
+            return pairs_exist and (not require_hole_cards or uses_hole_card)
         
         elif target_hand == "Two Pair":
-            # Count total pairs and pairs involving hole cards
             total_pairs = sum(1 for count in rank_counts.values() if count >= 2)
             uses_hole_card = any(rank_counts[rank] >= 2 for rank in hole_ranks)
-            return total_pairs >= 2 and uses_hole_card
+            return total_pairs >= 2 and (not require_hole_cards or uses_hole_card)
         
         elif target_hand == "Three of a Kind":
-            # Check if there's a three of a kind AND at least one hole card is part of it
             three_exists = any(count >= 3 for count in rank_counts.values())
             uses_hole_card = any(rank_counts[rank] >= 3 for rank in hole_ranks)
-            return three_exists and uses_hole_card
+            return three_exists and (not require_hole_cards or uses_hole_card)
         
         elif target_hand == "Straight":
-            # First, find if there's a straight
             has_straight = False
             straight_cards = []
             for i in range(len(numeric_ranks) - 4):
-                if numeric_ranks[i+4] - numeric_ranks[i] == 4:
-                    straight_cards = numeric_ranks[i:i+5]
+                if numeric_ranks[i + 4] - numeric_ranks[i] == 4:
+                    straight_cards = numeric_ranks[i:i + 5]
                     has_straight = True
                     break
             
             if not has_straight:
                 return False
             
-            # Convert hole cards to numeric values
             numeric_hole_ranks = []
             for rank in hole_ranks:
                 if rank == 'A':
@@ -155,21 +150,16 @@ class probabilityValidator:
                 else:
                     numeric_hole_ranks.append(int(rank))
             
-            # Check if any hole card is part of the straight
-            return any(rank in straight_cards for rank in numeric_hole_ranks)
+            return any(rank in straight_cards for rank in numeric_hole_ranks) if require_hole_cards else True
         
         elif target_hand == "Flush":
-            # Check if there's a flush AND at least one hole card is part of it
             for suit in set(suits):
                 if suit_counts[suit] >= 5:
-                    # Check if at least one hole card is part of this flush
                     hole_cards_in_flush = sum(1 for card in hole_cards if card[1] == suit)
-                    if hole_cards_in_flush > 0:
-                        return True
+                    return hole_cards_in_flush > 0 if require_hole_cards else True
             return False
         
         elif target_hand == "Full House":
-            # Find three of a kind that uses a hole card
             three_of_a_kind_rank = None
             for rank in hole_ranks:
                 if rank_counts[rank] >= 3:
@@ -179,18 +169,17 @@ class probabilityValidator:
             if not three_of_a_kind_rank:
                 return False
             
-            # Check for any pair (can be from any cards) different from the three of a kind
             for rank, count in rank_counts.items():
                 if rank != three_of_a_kind_rank and count >= 2:
                     return True
             return False
         
         elif target_hand == "Four of a Kind":
-            # Check if there's a four of a kind AND at least one hole card is part of it
             for rank, count in rank_counts.items():
                 if count >= 4 and rank in hole_ranks:
                     return True
             return False
+        
         return False
 
 
@@ -315,21 +304,59 @@ def run_validation_tests():
     validator = probabilityValidator()
 
 if __name__ == "__main__":
-    # run_validation_tests()
+
     validator = probabilityValidator()
-    # with open('test_scenarios.json', 'r') as f:
-    #     test_scenarios = json.load(f)
-    # all_probabilities = {}
-    # for hand_type in test_scenarios:
-    #     all_probabilities[hand_type] = {}
-    #     for scenario in test_scenarios[hand_type]:
-    #         mc_prob = validator.simulate_post_flop(test_scenarios[hand_type][scenario]["hole_cards"], test_scenarios[hand_type][scenario]["community_cards"])
-    #         all_probabilities[hand_type][scenario] = mc_prob[hand_type]
-    # print(all_probabilities)
-    # pickle.dump(pair_probabilities, open('pair_probabilities.pickle', 'wb'))
     hole_cards =  [["A", "♠"], ["7", "♥"]]
     community_cards = [["K", "♦"], ["Q", "♣"], ["9", "♣"]]
-    # probabilities = validator.calculate_probability(hole_cards, community_cards)
-    # print_pretty_dict(probabilities)
+
     abbreviated_probabilities = validator.get_abbreviated_probabilities(hole_cards, community_cards)
     print(abbreviated_probabilities)
+
+class HandEvaluator:
+    """
+    HandEvaluator identifies the best possible hand among a set
+    of poker hands. The method 'identify_best_hand' checks each
+    hand type in descending order of strength, returning as soon
+    as it finds a match.
+    """
+
+    def __init__(self):
+        # You might store any needed references or data here. 
+        pass
+
+    def identify_best_hand(self, hole_cards, community_cards):
+        """
+        Given hole_cards + community_cards, determine the single best ranked
+        poker hand in textual form. We'll check from strongest to weakest,
+        returning whichever we find first.
+
+        Fill in or update the logic to match your existing or desired approach.
+        """
+        # Combine both sets of cards for analysis
+        all_cards = hole_cards + community_cards
+        validator = probabilityValidator()
+
+        # Check from best to worst. If we find it, we return immediately.
+        # Adjust the order or method names as suits your logic:
+        if validator._has_hand(all_cards, "Royal Flush",False):
+            return "Royal Flush"
+        elif validator._has_hand(all_cards, "Straight Flush",False):
+            return "Straight Flush"
+        elif validator._has_hand(all_cards, "Four of a Kind", False):
+            return "Four of a Kind"
+        elif validator._has_hand(all_cards, "Full House", False):
+            return "Full House"
+        elif validator._has_hand(all_cards, "Flush", False):
+            return "Flush"
+        elif validator._has_hand(all_cards, "Straight", False):
+            return "Straight"
+        elif validator._has_hand(all_cards, "Three of a Kind", False):
+            return "Three of a Kind"
+        elif validator._has_hand(all_cards, "Two Pair", False):
+            return "Two Pair"
+        elif validator._has_hand(all_cards, "Pair", False):
+            return "Pair"
+        else:
+            return "High Card"
+
+
