@@ -31,6 +31,12 @@ def new_hand():
     session['current_community_cards'] = community_cards
     session['current_probabilities'] = probabilities
 
+    # RESET the quiz scoreboard for each new hand deal
+    session['quiz'] = { 
+        'correct_answers': 0, 
+        'total_questions': 0 
+    }
+
     return jsonify({
         'hole_cards': format_cards(hole_cards),
         'community_cards': format_cards(community_cards),
@@ -97,23 +103,20 @@ def poker_quiz_start():
 def poker_quiz_check_all():
     data = request.json or {}
     all_guesses = data.get("guesses", {})
-    stored_probs = session.get('current_probabilities', {})  # We do not overwrite them
+    stored_probs = session.get('current_probabilities', {})
 
     results = {}
     for hand_type, guessed_prob in all_guesses.items():
-        # The dictionary from your validator is presumably decimal probabilities:
-        # e.g.: {"pair": 0.18, "two pair": 0.07, ...}
         actual_decimal = stored_probs.get(hand_type.lower(), 0.0)
-        actual_percent = actual_decimal 
+        actual_percent = actual_decimal
         difference = abs(guessed_prob - actual_percent)
         correct = (difference <= 5.0)
         results[hand_type] = {"actual_prob": actual_percent, "correct": correct}
 
-    # Keep track of quiz stats if you like
+    # Only count the questions displayed here
     quiz_data = session.get('quiz', {})
-    quiz_data['total_questions'] = quiz_data.get('total_questions', 0) + len(all_guesses)
-    newly_correct = sum(1 for info in results.values() if info["correct"])
-    quiz_data['correct_answers'] = quiz_data.get('correct_answers', 0) + newly_correct
+    quiz_data['total_questions'] = len(all_guesses)
+    quiz_data['correct_answers'] = sum(1 for info in results.values() if info["correct"])
     session['quiz'] = quiz_data
 
     return jsonify({

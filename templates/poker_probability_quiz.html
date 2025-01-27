@@ -206,6 +206,9 @@
     </div>
 
     <script>
+        // We'll store the current "quiz state": either "guessing" or "checked"
+        let quizState = "guessing";
+
         // We'll store the list of non-zero hands here:
         let displayedHands = [];
 
@@ -222,6 +225,21 @@
             "royal flush"
         ];
 
+        // Listen for keydown events
+        window.addEventListener('keydown', (e) => {
+            if (e.key === "Enter") {
+                if (quizState === "guessing") {
+                    checkAnswers();
+                } else if (quizState === "checked") {
+                    newHand();
+                }
+            } 
+            else if (e.key === "Escape") {
+                // Redirect to the homepage
+                window.location.href = "/";
+            }
+        });
+
         function newHand() {
             fetch('/new_hand', { method: 'POST' })
                 .then(response => response.json())
@@ -231,6 +249,8 @@
 
                     clearResults();
                     createHandOptions(data.probabilities);
+                    // After dealing a new hand, switch state back to "guessing"
+                    quizState = "guessing";
                 })
                 .catch(console.error);
         }
@@ -243,14 +263,15 @@
             // 2) Build displayedHands in a fixed order
             displayedHands = [];
             handOrder.forEach(handType => {
-                // If the server didn't return a probability for this hand type, treat that as 0
                 const probValue = parseFloat(probMap[handType] || 0);
-                if (probValue > 0) {
+                
+                // Skip if probValue == 0 or probValue == 100
+                if (probValue > 0 && probValue < 100) {
                     displayedHands.push(handType);
                 }
             });
 
-            // 3) Create a row for each displayed (non-zero) hand in that order
+            // 3) For each displayed (non-zero & <100) hand, create a row
             displayedHands.forEach(ht => {
                 const displayName = titleCase(ht);
                 const div = document.createElement('div');
@@ -311,6 +332,9 @@
 
                 document.getElementById('correct-count').textContent = data.correct_answers;
                 document.getElementById('total-count').textContent = data.total_questions;
+                
+                // After checking answers, switch quizState to "checked"
+                quizState = "checked";
             } catch (err) {
                 console.error(err);
             }

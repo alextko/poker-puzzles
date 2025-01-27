@@ -19,7 +19,7 @@ class PokerQuiz:
         self.total_questions = 0
     
     def deal_cards(self, num_cards):
-        """Deal specified number of cards"""
+        """Deal specified number of cards from the deck and remove them."""
         cards = random.sample(self.deck, num_cards)
         for card in cards:
             self.deck.remove(card)
@@ -27,24 +27,22 @@ class PokerQuiz:
 
     def calculate_probabilities(self, hole_cards, community_cards=None):
         """
-        Use probabilityValidator to get real probabilities whenever community_cards is given,
-        returning them in lowercase keys so the front-end can match them.
+        Use probabilityValidator to get real probabilities (requiring hole cards)
+        whenever community_cards is given.
+        Returns a dictionary of handName -> probability (decimal form).
         """
         if community_cards:
             validator = probabilityValidator()
             raw_probs = validator.get_abbreviated_probabilities(hole_cards, community_cards)
             
-            # Ensure that the keys match your UI (e.g., "pair", "two pair", etc.), 
-            # by converting them to lowercase/spaces if necessary:
+            # Convert any keys to lowercase for front-end usage
             probabilities = {}
             for k, v in raw_probs.items():
-                # force the key to match your front-end, e.g. "pair", "two pair", ...
-                # if your validator returns "Pair", "Two Pair", etc., do something like:
                 probabilities[k.lower()] = v
 
             return probabilities
 
-        # If no community cards, return zeroes (or do an optional preflop logic)
+        # If no community cards, return zero percentages or do your own logic:
         return {
             "pair": 0.0,
             "two pair": 0.0,

@@ -38,38 +38,51 @@ class probabilityValidator:
         self.deck = [[rank, suit] for rank in self.ranks for suit in self.suits]
         self.rank_values = {rank: idx for idx, rank in enumerate(self.ranks)}
         self.num_simulations = num_simulations
-    def simulate_post_flop(self, hole_cards, community_cards=None):
-        """Run Monte Carlo simulation and return probabilities for all hand types"""
-        hand_types = ["Pair", "Two Pair", "Three of a Kind", "Straight", 
-                     "Flush", "Full House", "Four of a Kind"]
+    def simulate_post_flop(self, hole_cards, community_cards=None, require_hole_cards=True):
+        """
+        Run Monte Carlo simulation and return probabilities for all hand types,
+        requiring hole cards usage if 'require_hole_cards' is True.
+        """
+
+        hand_types = ["Pair", "Two Pair", "Three of a Kind", "Straight",
+                      "Flush", "Full House", "Four of a Kind", 
+                      "Straight Flush", "Royal Flush"]
         successes = {hand: 0 for hand in hand_types}
-        
-        for _ in tqdm.tqdm(range(self.num_simulations)):
-            # Reset deck and remove hole cards
-            deck = [[rank, suit] for rank in self.ranks for suit in self.suits]
+
+        # PRE-CHECK: if any hand is already formed by the existing board + hole,
+        # set it to 100% immediately by marking its success as self.num_simulations.
+        all_seven_cards = hole_cards + (community_cards if community_cards else [])
+        for hand_type in hand_types:
+            # if the 7 cards already hold this hand (ignore 'require_hole_cards' if you prefer a 100% lock)
+            if self._has_hand(all_seven_cards, hand_type, require_hole_cards=True) is True:
+                successes[hand_type] = self.num_simulations
+
+        for _ in range(self.num_simulations):
+            # Build a deck minus hole & community
+            deck = [[rank, suit] for rank, suit in self.deck]
             for card in hole_cards:
                 deck.remove(card)
-            
-            # Remove community cards if present
             if community_cards:
                 for card in community_cards:
-                    if card in deck:  # Check to avoid error if card was already removed
+                    if card in deck:
                         deck.remove(card)
-            
-            # Deal flop (or remaining community cards)
-            num_to_deal = 5 - len(community_cards) if community_cards else 3
-            flop = random.sample(deck, num_to_deal)
-            all_cards = hole_cards + (community_cards if community_cards else []) + flop
-            # Check each hand type
-            
+
+            # Deal remaining community if needed
+            cards_dealt = 5 - len(community_cards) if community_cards else 5
+            board = random.sample(deck, cards_dealt)
+            full_cards = hole_cards + (community_cards if community_cards else []) + board
+
             for hand_type in hand_types:
-                if self._has_hand(all_cards, hand_type):
-                    successes[hand_type] += 1
-        
+                # If we haven't already locked it to 100% from the pre-check:
+                if successes[hand_type] < self.num_simulations:
+                    if self._has_hand(full_cards, hand_type, require_hole_cards=require_hole_cards):
+                        successes[hand_type] += 1
+
         # Convert to percentages
-        probabilities = {hand: (count / self.num_simulations) * 100 
-                        for hand, count in successes.items()}
-        
+        probabilities = {
+            hand: (count / self.num_simulations) * 100
+            for hand, count in successes.items()
+        }
         return probabilities
 
     def _has_hand(self, cards, target_hand, require_hole_cards=True):
@@ -248,7 +261,7 @@ class probabilityValidator:
         remaining_cards = 52 - len(current_cards)
         # print('remaining cards', remaining_cards)
         for hand_type in hand_types:
-            if not self._has_hand(current_cards, hand_type):
+            if not self._has_hand(current_cards, hand_type, False):
                 num_outs_info = self._num_outs(hole_cards, community_cards, hand_type)
                 num_outs = num_outs_info['outs']
                 if 'two_card_outs' in num_outs_info:
@@ -259,12 +272,6 @@ class probabilityValidator:
                     # One card to come: outs / remaining cards
                     probability = (num_outs / remaining_cards) * 100
                 else:
-                    # Two cards to come using binomial probability:
-                    # P(at least one out) = 1 - P(no outs)
-                    # P(no outs) = (remaining_cards - outs) * (remaining_cards - outs - 1) / (remaining_cards * (remaining_cards - 1))
-                    # no_outs_prob = ((remaining_cards - num_outs) * (remaining_cards - num_outs - 1)) / (remaining_cards * (remaining_cards - 1))
-                    # probability = (1 - no_outs_prob) * 100
-                    # no_outs_prob = binom(remaining_cards - num_outs)
                     fail_draws = binom(remaining_cards - num_outs, 2)
                     all_draws = binom(remaining_cards, 2)
                     probability_one = (1 - fail_draws / all_draws) * 100
@@ -276,6 +283,8 @@ class probabilityValidator:
                       'two_card_outs': two_card_outs,'probability': round(probability, 2)}
                 else:
                     outs_dict[hand_type] = (num_outs, round(probability, 2))
+           
+
         return outs_dict
 
     def abbreviate_probability_dict(self, probability_dict):
